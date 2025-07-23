@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Jadwal Tugas & Pelajaran</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 30px;
+        background: #f6f8fa;
+        color: #222;
+    }
+    h1 {
+        color: #2d6cdf;
+        margin-bottom: 20px;
+    }
+    h2 {
+        margin-top: 40px;
+        color: #444;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 5px;
+    }
+    input, button {
+        margin: 5px 0;
+        padding: 8px 12px;
+        border-radius: 5px;
+        border: 1px solid #bdbdbd;
+        font-size: 1em;
+    }
+    input:focus {
+        outline: 2px solid #2d6cdf;
+        border-color: #2d6cdf;
+    }
+    button {
+        background: #2d6cdf;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button:hover {
+        background: #1b4fa0;
+    }
+    .list {
+        margin-bottom: 30px;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 8px;
+        background: #fff;
+        padding: 8px 12px;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    li button {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 0.9em;
+        margin-left: 10px;
+    }
+    li button:hover {
+        background: #c0392b;
+    }
+</style>
+</head>
+<body>
+    <h1>Manajemen Tugas & Jadwal Pelajaran</h1>
+
+    <h2>Tambah Tugas</h2>
+<input type="text" id="tugas" placeholder="Nama tugas">
+<input type="date" id="deadline">
+<input type="text" id="keterangan" placeholder="Keterangan tugas">
+<button onclick="tambahTugas()">Tambah</button>
+
+<ul id="daftarTugas" class="list"></ul>
+
+    <h2>Tambah Pelajaran</h2>
+    <input type="text" id="pelajaran" placeholder="Nama pelajaran">
+    <input type="text" id="hari" placeholder="Hari">
+    <input type="time" id="jam">
+    <button onclick="tambahPelajaran()">Tambah</button>
+
+    <ul id="daftarPelajaran" class="list"></ul>
+
+    <script>
+        // Load data dari localStorage
+        let tugas = JSON.parse(localStorage.getItem('tugas')) || [];
+        let pelajaran = JSON.parse(localStorage.getItem('pelajaran')) || [];
+
+        function renderTugas() {
+        const list = document.getElementById('daftarTugas');
+        list.innerHTML = '';
+        tugas.forEach((t, i) => {
+            list.innerHTML += `<li>
+                <div>
+                    <strong>${t.nama}</strong> | Deadline: ${t.deadline}<br>
+                    <em>${t.keterangan || ''}</em>
+                </div>
+                <button onclick="hapusTugas(${i})">Hapus</button>
+            </li>`;
+        });
+    }
+
+        function renderPelajaran() {
+            const list = document.getElementById('daftarPelajaran');
+            list.innerHTML = '';
+            pelajaran.forEach((p, i) => {
+                list.innerHTML += `<li>${p.nama} | Hari: ${p.hari} | Jam: ${p.jam} <button onclick="hapusPelajaran(${i})">Hapus</button></li>`;
+            });
+        }
+
+        function tambahTugas() {
+        const nama = document.getElementById('tugas').value;
+        const deadline = document.getElementById('deadline').value;
+        const keterangan = document.getElementById('keterangan').value;
+        if (nama && deadline) {
+            tugas.push({ nama, deadline, keterangan });
+            localStorage.setItem('tugas', JSON.stringify(tugas));
+            renderTugas();
+            document.getElementById('tugas').value = '';
+            document.getElementById('deadline').value = '';
+            document.getElementById('keterangan').value = '';
+        }
+    }
+
+        function tambahPelajaran() {
+            const nama = document.getElementById('pelajaran').value;
+            const hari = document.getElementById('hari').value;
+            const jam = document.getElementById('jam').value;
+            if (nama && hari && jam) {
+                pelajaran.push({ nama, hari, jam });
+                localStorage.setItem('pelajaran', JSON.stringify(pelajaran));
+                renderPelajaran();
+                document.getElementById('pelajaran').value = '';
+                document.getElementById('hari').value = '';
+                document.getElementById('jam').value = '';
+            }
+        }
+
+        function hapusTugas(i) {
+            tugas.splice(i, 1);
+            localStorage.setItem('tugas', JSON.stringify(tugas));
+            renderTugas();
+        }
+
+        function hapusPelajaran(i) {
+            pelajaran.splice(i, 1);
+            localStorage.setItem('pelajaran', JSON.stringify(pelajaran));
+            renderPelajaran();
+        }
+
+        // Render awal
+        renderTugas();
+        renderPelajaran();
+    </script>
+</body>
+</html>
