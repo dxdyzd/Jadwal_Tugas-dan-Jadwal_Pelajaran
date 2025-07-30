@@ -1,163 +1,197 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Jadwal Tugas & Pelajaran</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jadwal Tugas & Pelajaran</title>
+  <style>
     body {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        margin: 30px;
-        background: #f6f8fa;
-        color: #222;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 20px;
+      background: #f6f8fa;
+      color: #333;
     }
     h1 {
-        color: #2d6cdf;
-        margin-bottom: 20px;
+      color: #2d6cdf;
+      margin-bottom: 15px;
     }
     h2 {
-        margin-top: 40px;
-        color: #444;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 5px;
+      margin-top: 40px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 5px;
     }
     input, button {
-        margin: 5px 0;
-        padding: 8px 12px;
-        border-radius: 5px;
-        border: 1px solid #bdbdbd;
-        font-size: 1em;
+      padding: 8px 12px;
+      margin: 5px 5px 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
     }
     input:focus {
-        outline: 2px solid #2d6cdf;
-        border-color: #2d6cdf;
+      outline: none;
+      border-color: #2d6cdf;
+      box-shadow: 0 0 3px #2d6cdf55;
     }
     button {
-        background: #2d6cdf;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-        transition: background 0.2s;
+      background: #2d6cdf;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
     button:hover {
-        background: #1b4fa0;
+      background: #1b4fa0;
     }
     .list {
-        margin-bottom: 30px;
-        padding-left: 20px;
+      padding-left: 0;
+      list-style: none;
     }
     li {
-        margin-bottom: 8px;
-        background: #fff;
-        padding: 8px 12px;
-        border-radius: 5px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .right {
+      display: flex;
+      align-items: center;
     }
     li button {
-        background: #e74c3c;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 3px;
-        font-size: 0.9em;
-        margin-left: 10px;
+      background: #e74c3c;
+      padding: 6px 10px;
+      font-size: 0.85em;
+      border-radius: 4px;
+      margin-left: 10px;
     }
     li button:hover {
-        background: #c0392b;
+      background: #c0392b;
     }
-</style>
+    @media (max-width: 600px) {
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .right {
+        margin-top: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>Manajemen Tugas & Jadwal Pelajaran</h1>
+  <h1>Manajemen Tugas & Jadwal Pelajaran</h1>
 
-    <h2>Tambah Tugas</h2>
-<input type="text" id="tugas" placeholder="Nama tugas">
-<input type="date" id="deadline">
-<input type="text" id="keterangan" placeholder="Keterangan tugas">
-<button onclick="tambahTugas()">Tambah</button>
+  <h2>Tambah Tugas</h2>
+  <input type="text" id="tugas" placeholder="Nama tugas">
+  <input type="date" id="deadline">
+  <input type="text" id="keterangan" placeholder="Keterangan">
+  <button onclick="tambahTugas()">Tambah</button>
+  <ul id="daftarTugas" class="list"></ul>
 
-<ul id="daftarTugas" class="list"></ul>
+  <h2>Tambah Pelajaran</h2>
+  <input type="text" id="pelajaran" placeholder="Nama pelajaran">
+  <input type="text" id="hari" placeholder="Hari">
+  <input type="time" id="jam">
+  <button onclick="tambahPelajaran()">Tambah</button>
+  <ul id="daftarPelajaran" class="list"></ul>
 
-    <h2>Tambah Pelajaran</h2>
-    <input type="text" id="pelajaran" placeholder="Nama pelajaran">
-    <input type="text" id="hari" placeholder="Hari">
-    <input type="time" id="jam">
-    <button onclick="tambahPelajaran()">Tambah</button>
+  <script>
+    let tugas = JSON.parse(localStorage.getItem('tugas')) || [];
+    let pelajaran = JSON.parse(localStorage.getItem('pelajaran')) || [];
 
-    <ul id="daftarPelajaran" class="list"></ul>
+    const el = {
+      tugasList: document.getElementById('daftarTugas'),
+      pelajaranList: document.getElementById('daftarPelajaran')
+    };
 
-    <script>
-        // Load data dari localStorage
-        let tugas = JSON.parse(localStorage.getItem('tugas')) || [];
-        let pelajaran = JSON.parse(localStorage.getItem('pelajaran')) || [];
-
-        function renderTugas() {
-        const list = document.getElementById('daftarTugas');
-        list.innerHTML = '';
-        tugas.forEach((t, i) => {
-            list.innerHTML += `<li>
-                <div>
-                    <strong>${t.nama}</strong> | Deadline: ${t.deadline}<br>
-                    <em>${t.keterangan || ''}</em>
-                </div>
-                <button onclick="hapusTugas(${i})">Hapus</button>
-            </li>`;
-        });
+    function simpanData() {
+      localStorage.setItem('tugas', JSON.stringify(tugas));
+      localStorage.setItem('pelajaran', JSON.stringify(pelajaran));
     }
 
-        function renderPelajaran() {
-            const list = document.getElementById('daftarPelajaran');
-            list.innerHTML = '';
-            pelajaran.forEach((p, i) => {
-                list.innerHTML += `<li>${p.nama} | Hari: ${p.hari} | Jam: ${p.jam} <button onclick="hapusPelajaran(${i})">Hapus</button></li>`;
-            });
-        }
-
-        function tambahTugas() {
-        const nama = document.getElementById('tugas').value;
-        const deadline = document.getElementById('deadline').value;
-        const keterangan = document.getElementById('keterangan').value;
-        if (nama && deadline) {
-            tugas.push({ nama, deadline, keterangan });
-            localStorage.setItem('tugas', JSON.stringify(tugas));
-            renderTugas();
-            document.getElementById('tugas').value = '';
-            document.getElementById('deadline').value = '';
-            document.getElementById('keterangan').value = '';
-        }
+    function renderTugas() {
+      el.tugasList.innerHTML = '';
+      tugas.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div><strong>${t.nama}</strong> | Deadline: ${t.deadline}<br><em>${t.keterangan || ''}</em></div>
+          <div class="right"><button onclick="hapusTugas(${i})">Hapus</button></div>
+        `;
+        el.tugasList.appendChild(li);
+      });
     }
 
-        function tambahPelajaran() {
-            const nama = document.getElementById('pelajaran').value;
-            const hari = document.getElementById('hari').value;
-            const jam = document.getElementById('jam').value;
-            if (nama && hari && jam) {
-                pelajaran.push({ nama, hari, jam });
-                localStorage.setItem('pelajaran', JSON.stringify(pelajaran));
-                renderPelajaran();
-                document.getElementById('pelajaran').value = '';
-                document.getElementById('hari').value = '';
-                document.getElementById('jam').value = '';
-            }
-        }
+    function renderPelajaran() {
+      el.pelajaranList.innerHTML = '';
+      pelajaran.forEach((p, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div><strong>${p.nama}</strong> | Hari: ${p.hari} | Jam: ${p.jam}</div>
+          <div class="right"><button onclick="hapusPelajaran(${i})">Hapus</button></div>
+        `;
+        el.pelajaranList.appendChild(li);
+      });
+    }
 
-        function hapusTugas(i) {
-            tugas.splice(i, 1);
-            localStorage.setItem('tugas', JSON.stringify(tugas));
-            renderTugas();
-        }
+    function tambahTugas() {
+      const nama = document.getElementById('tugas').value.trim();
+      const deadline = document.getElementById('deadline').value;
+      const keterangan = document.getElementById('keterangan').value.trim();
 
-        function hapusPelajaran(i) {
-            pelajaran.splice(i, 1);
-            localStorage.setItem('pelajaran', JSON.stringify(pelajaran));
-            renderPelajaran();
-        }
+      if (!nama || !deadline) {
+        alert("Nama tugas dan deadline harus diisi!");
+        return;
+      }
 
-        // Render awal
+      tugas.push({ nama, deadline, keterangan });
+      simpanData();
+      renderTugas();
+
+      document.getElementById('tugas').value = '';
+      document.getElementById('deadline').value = '';
+      document.getElementById('keterangan').value = '';
+    }
+
+    function tambahPelajaran() {
+      const nama = document.getElementById('pelajaran').value.trim();
+      const hari = document.getElementById('hari').value.trim();
+      const jam = document.getElementById('jam').value;
+
+      if (!nama || !hari || !jam) {
+        alert("Semua kolom pelajaran harus diisi!");
+        return;
+      }
+
+      pelajaran.push({ nama, hari, jam });
+      simpanData();
+      renderPelajaran();
+
+      document.getElementById('pelajaran').value = '';
+      document.getElementById('hari').value = '';
+      document.getElementById('jam').value = '';
+    }
+
+    function hapusTugas(i) {
+      if (confirm("Hapus tugas ini?")) {
+        tugas.splice(i, 1);
+        simpanData();
         renderTugas();
+      }
+    }
+
+    function hapusPelajaran(i) {
+      if (confirm("Hapus pelajaran ini?")) {
+        pelajaran.splice(i, 1);
+        simpanData();
         renderPelajaran();
-    </script>
+      }
+    }
+
+    // Initial render
+    renderTugas();
+    renderPelajaran();
+  </script>
 </body>
 </html>
